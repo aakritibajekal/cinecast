@@ -16,7 +16,7 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="navbar-brand" href="{{ route( 'welcome' ) }}">
+    <a class="navbar-brand" href="{{ route( 'posts.index' ) }}">
     Why Casts
     </a>
 </li>

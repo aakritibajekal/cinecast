@@ -29,9 +29,9 @@ class CommentController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ( $user ) // we are logged in and can create posts
+        if ( $user ) 
             return view('comments.create');
-        else // not logged in, can not make posts. redirect to index
+        else 
             return redirect('/posts');
     }
 
@@ -43,11 +43,11 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) //only store data if user is logged in. 
+        if ( $user = Auth::user() ) 
         {
 
         $validatedData = $request->validate(array( 
-            'content' => 'required|max:255',
+            'content' => 'required|max:360',
            
         ));
 
@@ -64,8 +64,8 @@ class CommentController extends Controller
    
     
        
-         return redirect('/posts')->with('success', 'Comment saved.');
-        }// redirect by default
+         return redirect('/posts')->with('success', 'You commented is saved.');
+        }
          return redirect('/posts');
     }
 
@@ -120,7 +120,7 @@ class CommentController extends Controller
     
              Comment::whereId($id)->update($validatedData);
              
-             return redirect('/posts')->with('success', 'Comment updated.');
+             return redirect('/posts')->with('success', 'Your comment is updated.');
             }
             return redirect('/posts');
     }
@@ -138,7 +138,7 @@ class CommentController extends Controller
     
             $comment->delete();
     
-            return redirect('/posts')->with('success', 'Comment deleted.');
+            return redirect('/posts')->with('success', 'Your comment is deleted.');
         }
         return redirect('/posts');
     }

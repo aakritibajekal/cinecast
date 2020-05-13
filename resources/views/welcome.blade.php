@@ -12,7 +12,7 @@
         <!-- Styles -->
         <style>
             html, body {
-                background-color: #fff;
+                background-color: #D0DFFC;
                 color: #636b6f;
                 font-family: 'Nunito', sans-serif;
                 font-weight: 200;
@@ -84,7 +84,7 @@
 
                 <div>
                     <figure>
-                        <img class=".img-responsive" src="{{URL('/images/dogSmall.png')}}">
+                        <img class=".img-responsive" src="{{URL('/images/cinecast.png')}}">
                     </figure>
                 </div>
 

@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'username', 'email', 'password',
     ];
 
     /**
@@ -29,18 +29,33 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
     public function profiles()
     {
         return $this->hasOne( 'App\Profile' );
+    }
+    public function comments()
+    {
+        return $this->hasMany( 'App\Comment' );
+    }
+
+    public function posts()
+    {
+        return $this->hasMany( 'App\Post' );
+    }
+
+    public function followers()
+    {
+        return $this->hasMany( 'App\Follower' )->withTimestamps();
+    }
+
+    public function followings()
+    {
+        return $this->hasMany( 'App\Follower' )->withTimestamps();
+    }
+
+    public function likedPosts()
+    {
+        return $this->morphedByMany('App\Post', 'likeable')->whereDeletedAt(null);
     }
 
 }

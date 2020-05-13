@@ -27,8 +27,10 @@ class PostController extends Controller
         if ( $user = Auth::user() ) 
         {
             $profile = Profile::where("user_id", "=", $user->id)->firstOrFail(); 
-          
+            
             $follower = Follower::where("follower_id", "=", $profile->id)->find('followed');
+
+            $count_comments = Post::count("count_comments");
 
             $posts = Post::query( )
             ->join( 'profiles', 'posts.profile_id', '=', 'profiles.id' )
@@ -41,17 +43,20 @@ class PostController extends Controller
             'posts.posted_at',
             'posts.content',
             'posts.picture',
-            'posts.likes_count',  )
+            'posts.likes_count',
+            'posts.count_comments'  )
             ->orderBy('posts.id', 'desc')
-            ->get(); 
+            ->simplePaginate(25); 
             
             $post = Post::where("profile_id", "=", $profile->id)->first();   
 
-        return view('posts.index', compact('posts', 'profile', 'follower')  );
+        return view('posts.index', compact('posts', 'profile', 'follower', 'post', 'count_comments', 'user')  );
 
         }  else 
 
-            $posts = Post::all();
+            $posts = Post::all()
+            ->get()
+            ->simplePaginate(25);
            
             return view('posts.index', compact('posts'));
     }
@@ -64,9 +69,9 @@ class PostController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ( $user ) // we are logged in and can create posts
+        if ( $user ) 
             return view('posts.create');
-        else // not logged in, can not make posts. redirect to index
+        else 
             return redirect('/posts');
     }
 
@@ -78,7 +83,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) //only store data if user is logged in. 
+        if ( $user = Auth::user() ) 
         {
 
         $validatedData = $request->validate(array( 
@@ -94,8 +99,8 @@ class PostController extends Controller
         $post->save();
         
     
-         return redirect('/posts')->with('success', 'Post saved.');
-        }// redirect by default
+         return redirect('/posts')->with('success', 'Cast saved.');
+        }
          return redirect('/posts');
     }
 
@@ -148,7 +153,7 @@ class PostController extends Controller
     
              Post::whereId($id)->update($validatedData);
 
-             return redirect('/posts')->with('success', 'Post updated.');
+             return redirect('/posts')->with('success', 'Cast updated.');
             }
             return redirect('/posts');
     }
@@ -166,17 +171,28 @@ class PostController extends Controller
     
             $post->delete();
     
-            return redirect('/posts')->with('success', 'Post deleted.');
+            return redirect('/posts')->with('success', 'Cast deleted.');
         }
         return redirect('/posts');
     }
 
-    public function showProfile($id)
+    public function getlike(Request $request)
     {
-        $profiles = Profile::query( )
-        ->join( 'profiles', 'posts.profile_id', '=', 'profiles.id' ) // faster to do both queries together
-        ->get(); // we want them all because we are looping through them in our show
+        $post = Post::find($request->post);
+        return response()->json([
+            'post' => $post,
+        ]);
+    }
 
+    public function like(Request $request)
+    {
+        $post = Post::find($request->post);
+        $value = $post->like;
+        $post->like = $value + 1;
+        $post->save();
+        return response()->json([
+            'message' => 'Thanks',
+        ]);
     }
 
     }

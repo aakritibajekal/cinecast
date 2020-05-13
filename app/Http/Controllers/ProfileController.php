@@ -22,8 +22,8 @@ class ProfileController extends Controller
     public function index()
     {
         $profiles = Profile::query( )
-        ->join( 'users', 'profiles.user_id', '=', 'users.id' ) // faster to do both queries together
-        ->get(); // we want them all because we are looping through them in our index
+        ->join( 'users', 'profiles.user_id', '=', 'users.id' ) 
+        ->get(); 
 
         $posts = Post::all();
        
@@ -41,9 +41,9 @@ class ProfileController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ( $user ) // we are logged in and can create a profile
+        if ( $user ) 
             return view('profiles.create');
-        else // not logged in, can not make posts. redirect to index
+        else 
             return redirect('/posts');
     }
 
@@ -55,12 +55,12 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) //only store data if user is logged in. 
+        if ( $user = Auth::user() ) 
         {
 
         $validatedData = $request->validate(array( 
             'username' => 'required|max:25',
-            'bio' => 'max:255'
+            'bio' => 'max:360'
            
 
         ));
