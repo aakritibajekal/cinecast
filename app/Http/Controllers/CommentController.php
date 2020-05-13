@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Auth;
 use App\Post;
-use App\Profile;
 use App\User;
 use App\Comment;
+use App\Profile;
 
 class CommentController extends Controller
 {
@@ -29,9 +29,9 @@ class CommentController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ( $user ) 
+        if ( $user ) // we are logged in and can create posts
             return view('comments.create');
-        else 
+        else // not logged in, can not make posts. redirect to index
             return redirect('/posts');
     }
 
@@ -43,31 +43,33 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) 
+        if ( $user = Auth::user() ) //only store data if user is logged in. 
         {
 
         $validatedData = $request->validate(array( 
-            'content' => 'required|max:360',
-           
+            'content' => 'required|max:255',
+
         ));
 
         $input = $request->all();
         $input['user_id'] = auth()->user()->id;
-     
+        $input['post_id'] = $request->input('post_id');
+
         if ( isset($input['is_gif']  ) && ($input['is_gif'] === 'true') ) {
-         
+
             $input['is_gif'] = 1;
-            
+
         }
 
         Comment::create($input);
-   
-    
-       
-         return redirect('/posts')->with('success', 'You commented is saved.');
-        }
+
+
+
+         return redirect('/posts')->with('success', 'Comment saved.');
+        }// redirect by default
          return redirect('/posts');
     }
+
 
     /**
      * Display the specified resource.
@@ -81,7 +83,7 @@ class CommentController extends Controller
 
         $post = Post::findOrFail($id);
 
-        $profile = Profile::findOrFail($post->profile_id);
+        $user = User::findOrFail($post->user_id);
 
 
         return view( 'comments.show', compact('comment') );
@@ -99,6 +101,14 @@ class CommentController extends Controller
 
             $comment = Comment::findOrFail($id);
 
+            $profile = Profile::where("user_id", "=", $user->id)->firstOrFail(); 
+
+            if ( isset($comment->is_gif ) && ($comment->is_gif === 'true') ) {
+         
+                $comment->is_gif = 1;
+                
+            }
+
             return view( 'comments.edit', compact('comment') );
         }
         return redirect('/posts');
@@ -115,12 +125,12 @@ class CommentController extends Controller
     {
         if ( $user = Auth::user() ) {
             $validatedData = $request->validate(array( 
-                'content' => 'required|max:360',
+                'content' => 'required|max:255',
              ));
     
              Comment::whereId($id)->update($validatedData);
-             
-             return redirect('/posts')->with('success', 'Your comment is updated.');
+
+             return redirect('/posts')->with('success', 'Comment updated.');
             }
             return redirect('/posts');
     }
@@ -138,7 +148,7 @@ class CommentController extends Controller
     
             $comment->delete();
     
-            return redirect('/posts')->with('success', 'Your comment is deleted.');
+            return redirect('/posts')->with('success', 'Comment deleted.');
         }
         return redirect('/posts');
     }

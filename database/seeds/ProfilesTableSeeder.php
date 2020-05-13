@@ -16,10 +16,11 @@ class ProfilesTableSeeder extends Seeder
         //
         $faker = Factory::create();
     
-        foreach( range(1, 30) as $index ) {
+        foreach( range(1, 50) as $index )
+         {
             DB::table( 'profiles' )->insert( array(
                 'username' => $faker->name,
-                'picture' => $faker->imageUrl($width = 640, $height = 480),
+                'profile_pic' => $faker->imageUrl($width = 640, $height = 480),
                 'bio' => $faker->paragraph,
                 'user_id' => $faker->unique()->randomElement(User::pluck( 'id' )->toArray()),
             ));

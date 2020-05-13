@@ -22,15 +22,13 @@ class ProfileController extends Controller
     public function index()
     {
         $profiles = Profile::query( )
-        ->join( 'users', 'profiles.user_id', '=', 'users.id' ) 
-        ->get(); 
+        ->join( 'users', 'profiles.user_id', '=', 'users.id' ) // faster to do both queries together
+        ->get(); // we want them all because we are looping through them in our index
 
         $posts = Post::all();
        
-        $profile = Profile::find($profile_id);
-       
-
-    return view('profiles.index', compact('profiles', 'posts' , 'profile'));
+      
+    return view('profiles.index', compact('profiles', 'posts'));
     }
 
     /**
@@ -41,9 +39,9 @@ class ProfileController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ( $user ) 
+        if ( $user ) // we are logged in and can create a profile
             return view('profiles.create');
-        else 
+        else // not logged in, can not make posts. redirect to index
             return redirect('/posts');
     }
 
@@ -55,12 +53,12 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) 
+        if ( $user = Auth::user() ) //only store data if user is logged in. 
         {
 
         $validatedData = $request->validate(array( 
             'username' => 'required|max:25',
-            'bio' => 'max:360'
+            'bio' => 'max:255'
            
 
         ));
@@ -71,7 +69,7 @@ class ProfileController extends Controller
         $profile->user_id = $user->id;
         $profile->username = $validatedData['username'];
         $profile->bio = $validatedData['bio'];
-        $profile->picture = 'picture';
+        $profile->profile_pic = 'profile_pic';
         $profile->save();
         
     
@@ -93,13 +91,10 @@ class ProfileController extends Controller
         $post = Post::findOrFail($id);
 
         $posts = Post::query( )
-            ->join( 'profiles', 'posts.profile_id', '=', 'profiles.id' )
+            ->join( 'users', 'posts.user_id', '=', 'users.id' )
             ->select( 'posts.id',
-            'profiles.id as profile_ID',
-            'profiles.username',
-            'profiles.bio',
-            'profiles.picture',
-            'posts.posted_at',
+            'users.id as user_id',
+            'users.name',
             'posts.posted_at',
             'posts.content',
             'posts.picture',
@@ -167,44 +162,6 @@ class ProfileController extends Controller
         return redirect('/posts');
     }
 
-    public function showPost($id)
-    {
-        $posts = Post::query( )
-        ->join( 'posts', 'posts.profile_id', '=', 'profiles.id' ) // faster to do both queries together
-        ->get(); // we want them all because we are looping through them in our show
-
-    }
-
-    public function getUserByUsername($username)
-    {
-        return User::with('profile')->wherename($username)->firstOrFail();
-    }
-
-    
-    public function followProfile($id)
-    {
-        $follow = New Follower;
-        $follow->profile_id = profile()->id;
-        $follow->follower_id = $id;
-        $follow->followed = 1;
-        $follow->save();
-
-        return redirect()->back();
-
-    }
-
-    public function UnfollowProfile($id)
-    {
-        $follow = Follower::where('profile_id', profile()->id)
-                    ->where('follower_id', $id)
-                    ->delete();
-
-                    return redirect()->back();
-    }
-
-    
-
-    
-
+   
 }
 

@@ -13,19 +13,17 @@ use App\Comment;
 class FollowerController extends Controller
 {
    
-    public function followProfile(int $id)
+    public function followUser(int $id)
     {
         if ( $user = Auth::user() ) 
         {
-            $profile = Profile::where("user_id", "=", $user->id)->firstOrFail();
-
             $follower = New Follower;
-            $follower->profile_id = $id;
-            $follower->follower_id = $profile->id;
+            $follower->user_id = $id;
+            $follower->follower_id = $user->id;
             $follower->followed = 1;
             $follower->save();
 
-            return redirect('/posts')->with('success', 'Started following Profile.');
+            return redirect('/posts')->with('success', 'Started following User.');
         }
         if(! $user) {
     
@@ -33,19 +31,18 @@ class FollowerController extends Controller
         }
     }
 
-    public function UnfollowProfile($id)
+    public function UnfollowUser($id)
     {
         if ( $user = Auth::user() ) 
         {
 
-        $profile = Profile::where("user_id", "=", $user->id)->firstOrFail();
-
-        $follower = Follower::where( 'profile_id', '=', $id )
-                    ->where('follower_id', $profile->id)
+        
+        $follower = Follower::where( 'user_id', '=', $id )
+                    ->where('follower_id', $user->id)
                     ->delete();
 
     
-                    return redirect('/posts')->with('success', 'Stopped following Profile.');
+                    return redirect('/posts')->with('success', 'Stopped following User.');
         }           
     }
 

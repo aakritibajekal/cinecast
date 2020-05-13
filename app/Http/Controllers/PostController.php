@@ -23,19 +23,19 @@ class PostController extends Controller
     public function index()
     {
       
-        if ( $profile = Auth::profile() ) 
+        if ( $user = Auth::user() ) 
         {
-            $profile = Profile::where("profile_id", "=", $profile->id)->firstOrFail(); 
+            $profile = Profile::where("user_id", "=", $user->id)->firstOrFail(); 
 
             $comments_count = Post::count("comments_count");
           
-            $follower = Follower::where("follower_id", "=", $profile->id)->find('followed');
+            $follower = Follower::where("follower_id", "=", $user->id)->find('followed');
 
             $posts = Post::query( )
-            ->join( 'profile', 'posts.profile_id', '=', 'profile.id' )
+            ->join( 'users', 'posts.user_id', '=', 'users.id' )
             ->select( 'posts.id',
-            'profile.id as profile_id',
-            'profile.name',
+            'users.id as user_id',
+            'users.name',
             'posts.posted_at',
             'posts.posted_at',
             'posts.content',
@@ -43,18 +43,18 @@ class PostController extends Controller
             'posts.likes_count',
             'posts.comments_count',  )
             ->orderBy('posts.id', 'desc')
-            ->simplePaginate(5);
+            ->simplePaginate(10);
             
-            $post = Post::where("profile_id", "=", $profile->id)->first();   
+            $post = Post::where("user_id", "=", $user->id)->first();   
 
         return view('posts.index', compact('posts', 'post', 'follower', 'comments_count', 'profile', 'user')  );
 
         }  else 
 
             $posts = Post::query()
-                ->join( 'profile', 'posts.profile_id', '=', 'profile.id' )
+                ->join( 'users', 'posts.user_id', '=', 'users.id' )
                 ->select( 'posts.id',
-                'profile.id as user_id',
+                'users.id as user_id',
                 'users.name',
                 'posts.posted_at',
                 'posts.posted_at',
@@ -76,8 +76,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        $profile = Auth::profile();
-        if ( $profile ) 
+        $user = Auth::user();
+        if ( $user ) 
             return view('posts.create');
         else 
             return redirect('/posts');
@@ -91,21 +91,21 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $profile = Auth::profile() ) 
+        if ( $user = Auth::user() ) 
         {
 
         $validatedData = $request->validate(array( 
-            'content' => 'required|max:360',
+            'content' => 'required|max:255',
            
         ));
         $post = new Post();
-        $post->profile_id = $profile->id;
+        $post->user_id = $user->id;
         $post->content = $validatedData['content'];
         $post->picture = 'picture';
         $post->save();
         
     
-         return redirect('/posts')->with('success', 'Cast saved.');
+         return redirect('/posts')->with('success', 'Post saved.');
         }
          return redirect('/posts');
     }
@@ -122,9 +122,9 @@ class PostController extends Controller
 
         $comment = new Comment();
 
-        $profile = User::findOrFail($post->profile_id);
+        $user = User::findOrFail($post->user_id);
 
-        $profile = Profile::where("profile_id", "=", $profile->id)->firstOrFail(); 
+        $profile = Profile::where("user_id", "=", $user->id)->firstOrFail(); 
 
         return view( 'posts.show', compact('post', 'comment', 'profile', 'user') );
 
@@ -138,7 +138,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        if ( $profile = Auth::profile() ) {
+        if ( $user = Auth::user() ) {
             
             $post = Post::findOrFail($id);
 
@@ -156,14 +156,14 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if ( $profile = Auth::profile() ) {
+        if ( $user = Auth::user() ) {
             $validatedData = $request->validate(array( 
-                'content' => 'required', 'max:360',
+                'content' => 'required|max:255',
              ));
     
              Post::whereId($id)->update($validatedData);
 
-             return redirect('/posts')->with('success', 'Cast updated.');
+             return redirect('/posts')->with('success', 'Post updated.');
             }
             return redirect('/posts');
     }
@@ -176,12 +176,12 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        if ( $profile = Auth::profile() ) {
+        if ( $user = Auth::user() ) {
             $post = Post::findOrFail($id);
     
             $post->delete();
     
-            return redirect('/posts')->with('success', 'Cast deleted.');
+            return redirect('/posts')->with('success', 'Post deleted.');
         }
         return redirect('/posts');
     }
@@ -201,7 +201,7 @@ class PostController extends Controller
         $post->like = $value + 1;
         $post->save();
         return response()->json([
-            'message' => 'Thank you for liking!',
+            'message' => 'Thanks',
         ]);
     }
 

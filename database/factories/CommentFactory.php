@@ -10,7 +10,7 @@ use Faker\Generator as Faker;
 $factory->define(Comment::class, function (Faker $faker) {
     return [
         'content' => $faker->paragraph,
-        'profile_id' => $faker->randomElement(Profile::pluck( 'id' )->toArray()),
+        'user_id' => $faker->randomElement(User::pluck( 'id' )->toArray()),
         'post_id' => $faker->randomElement(Post::pluck( 'id' )->toArray()),
     ];
 });
