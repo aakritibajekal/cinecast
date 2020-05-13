@@ -19,7 +19,7 @@ class Post extends Model
         'content',
         'picture',
         'likes_count',
-        'comments_count'
+        'count_comments'
     );
 
     public function users()

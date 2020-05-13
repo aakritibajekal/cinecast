@@ -15,7 +15,6 @@ use App\Follower;
 class PostController extends Controller 
 {
   
-
     /**
      * Display a listing of the resource.
      *
@@ -24,40 +23,49 @@ class PostController extends Controller
     public function index()
     {
       
-        if ( $user = Auth::user() ) 
+        if ( $profile = Auth::profile() ) 
         {
-            $profile = Profile::where("user_id", "=", $user->id)->firstOrFail(); 
-            
+            $profile = Profile::where("profile_id", "=", $profile->id)->firstOrFail(); 
+
+            $comments_count = Post::count("comments_count");
+          
             $follower = Follower::where("follower_id", "=", $profile->id)->find('followed');
 
-            $count_comments = Post::count("count_comments");
-
             $posts = Post::query( )
-            ->join( 'profiles', 'posts.profile_id', '=', 'profiles.id' )
+            ->join( 'profile', 'posts.profile_id', '=', 'profile.id' )
             ->select( 'posts.id',
-            'profiles.id as profile_ID',
-            'profiles.username',
-            'profiles.bio',
-            'profiles.picture',
+            'profile.id as profile_id',
+            'profile.name',
             'posts.posted_at',
             'posts.posted_at',
             'posts.content',
             'posts.picture',
             'posts.likes_count',
-            'posts.count_comments'  )
+            'posts.comments_count',  )
             ->orderBy('posts.id', 'desc')
-            ->simplePaginate(25); 
+            ->simplePaginate(5);
             
             $post = Post::where("profile_id", "=", $profile->id)->first();   
 
-        return view('posts.index', compact('posts', 'profile', 'follower', 'post', 'count_comments', 'user')  );
+        return view('posts.index', compact('posts', 'post', 'follower', 'comments_count', 'profile', 'user')  );
 
         }  else 
 
-            $posts = Post::all()
-            ->get()
-            ->simplePaginate(25);
-           
+            $posts = Post::query()
+                ->join( 'profile', 'posts.profile_id', '=', 'profile.id' )
+                ->select( 'posts.id',
+                'profile.id as user_id',
+                'users.name',
+                'posts.posted_at',
+                'posts.posted_at',
+                'posts.content',
+                'posts.picture',
+                'posts.likes_count',
+                'posts.comments_count',  )
+                ->orderBy('posts.id', 'desc')
+                ->get();
+
+          
             return view('posts.index', compact('posts'));
     }
 
@@ -68,8 +76,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        $user = Auth::user();
-        if ( $user ) 
+        $profile = Auth::profile();
+        if ( $profile ) 
             return view('posts.create');
         else 
             return redirect('/posts');
@@ -83,15 +91,13 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        if ( $user = Auth::user() ) 
+        if ( $profile = Auth::profile() ) 
         {
 
         $validatedData = $request->validate(array( 
-            'content' => 'required|max:255',
+            'content' => 'required|max:360',
            
         ));
-        $profile = Profile::where("user_id", "=", $user->id)->firstOrFail();
-
         $post = new Post();
         $post->profile_id = $profile->id;
         $post->content = $validatedData['content'];
@@ -114,9 +120,13 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-        $profile = Profile::findOrFail($post->profile_id);
+        $comment = new Comment();
 
-        return view( 'posts.show', compact('post', 'profile') );
+        $profile = User::findOrFail($post->profile_id);
+
+        $profile = Profile::where("profile_id", "=", $profile->id)->firstOrFail(); 
+
+        return view( 'posts.show', compact('post', 'comment', 'profile', 'user') );
 
     }
 
@@ -128,7 +138,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        if ( $user = Auth::user() ) {
+        if ( $profile = Auth::profile() ) {
             
             $post = Post::findOrFail($id);
 
@@ -146,9 +156,9 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if ( $user = Auth::user() ) {
+        if ( $profile = Auth::profile() ) {
             $validatedData = $request->validate(array( 
-                'content' => 'required|max:255',
+                'content' => 'required', 'max:360',
              ));
     
              Post::whereId($id)->update($validatedData);
@@ -166,7 +176,7 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        if ( $user = Auth::user() ) {
+        if ( $profile = Auth::profile() ) {
             $post = Post::findOrFail($id);
     
             $post->delete();
@@ -191,7 +201,7 @@ class PostController extends Controller
         $post->like = $value + 1;
         $post->save();
         return response()->json([
-            'message' => 'Thanks',
+            'message' => 'Thank you for liking!',
         ]);
     }
 

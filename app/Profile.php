@@ -15,6 +15,6 @@ class Profile extends Model
     }
     
     protected $fillable = [
-        'username', 'user_id', 'bio', 'profile_pic'
+        'username', 'user_id', 'bio', 'picture'
     ];
 }
