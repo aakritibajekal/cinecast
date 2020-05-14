@@ -9,32 +9,14 @@
         <title> @yield('title') </title>
         <link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css">
         <script src="{{ asset('js/app.js') }}" type ="text/javascript" defer ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/ScrollMagic.min.js"></script>
         
     </head>
-    <style>
-    .footer {
-        align-items: center;
-        text-align: center;
-        background: #D0DFFC;
-        }
-    </style>
 
     <body>
-        @include('partials.navigation')
-        <h1>
-            @yield('title')
-        </h1>
-
-        @yield('js')
 
         @yield('content')
       
     </body>
-    <footer class="welcome-footer">
-    <a href="#" class="fa fa-facebook"></a>
-    <a href="#" class="fa fa-twitter"></a>
-    <a href="#" class="fa fa-linkedin"></a>
-    <p>CineCast &copy; Copyright 2020</p>
-    </footer>
 
 </html>

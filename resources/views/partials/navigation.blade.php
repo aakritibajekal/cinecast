@@ -5,7 +5,7 @@
 <li class="nav-item" class="mx-auto">
     <a  href="./">
     <figure  >
-        <img class="img-responsive" hspace="20" alt="logo" src="{{URL( '/images/cinecast.png' )}}">
+        <img class="nav-responsive" hspace="20" alt="CineCast" src="{{URL( '/images/cinecast.png' )}}">
     </figure>
     </a>
 </li>
